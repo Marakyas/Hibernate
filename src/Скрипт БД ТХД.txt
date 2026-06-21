@@ -1,0 +1,125 @@
+CREATE TABLE IF NOT EXISTS public.client(
+client_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+name VARCHAR(50) NOT NULL,
+surname VARCHAR(50) NOT NULL,
+email VARCHAR(255) NOT NULL CONSTRAINT unique_visitors_email UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS public.ticket_type(
+type_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+access_level VARCHAR(50) NOT NULL,
+access_start_time TIMESTAMP NOT NULL DEFAULT CURRENT_DATE,
+end_of_access_time TIMESTAMP NOT NULL DEFAULT CURRENT_DATE,
+
+CONSTRAINT acces_level_error check (access_level in ('VIP', 'standard')) -- Можно еще добавить
+);
+
+CREATE TABLE IF NOT EXISTS public.equipment(
+id_equipment INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+equipment_type VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.artists(
+artist_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+artist_name VARCHAR(50) NOT NULL,
+artist_surname VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.scene(
+scene_zone_id INT NOT NULL,
+scene_id INT NOT NULL,
+
+constraint scene_pk PRIMARY KEY (scene_zone_id, scene_id)
+);
+
+
+CREATE TABLE IF NOT EXISTS public.activities(
+activity_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+description TEXT NOT NULL DEFAULT 'no description',
+activity_start_time TIMESTAMP NOT NULL DEFAULT CURRENT_DATE,
+activity_end_time TIMESTAMP NOT NULL DEFAULT CURRENT_DATE 
+);
+
+CREATE TABLE IF NOT EXISTS public.groups(
+group_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+group_name VARCHAR(255) NOT NULL,
+music_style VARCHAR(255) DEFAULT 'not stated'
+);
+
+CREATE TABLE IF NOT EXISTS public.artists_in_groups(
+artist_id INT NOT NULL,
+group_id INT NOT NULL,
+
+FOREIGN KEY (artist_id) references public.artists(artist_id),
+FOREIGN KEY (group_id) references public.groups(group_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.Raiders(
+raider_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+id_equip INT NOT NULL,
+id_group INT NOT NULL,
+basic_needs VARCHAR(255),
+
+FOREIGN KEY (id_equip) references public.equipment(id_equipment),
+FOREIGN KEY (id_group) references public.groups(group_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.perfomances(
+id_perfomance INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+id_grp INT NOT NULL,
+id_scn INT NOT NULL,
+id_zn INT NOT NULL,
+start_perfomance TIMESTAMP NOT NULL DEFAULT CURRENT_DATE,
+end_perfomance TIMESTAMP NOT NULL DEFAULT CURRENT_DATE,
+
+FOREIGN KEY (id_grp) references public.groups(group_id) on delete restrict,
+FOREIGN KEY (id_scn, id_zn) references public.scene(scene_id, scene_zone_id) on delete restrict
+);
+
+CREATE TABLE IF NOT EXISTS public.ticket(
+id_ticket INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+clnt_id INT NOT NULL,
+tp_id INT NOT NULL,
+
+FOREIGN KEY (clnt_id) references public.client(client_id),
+FOREIGN KEY (tp_id) references public.ticket_type(type_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.buy_ticket(
+Id_transaction INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+tckt_id INT NOT null,
+transaction_time TIMESTAMP NOT NULL DEFAULT CURRENT_DATE,
+payment_method VARCHAR(50) NOT NULL CONSTRAINT wrong_payment_method check (payment_method in ('cash', 'card')),
+
+FOREIGN KEY (tckt_id) REFERENCES public.ticket(id_ticket) on delete restrict
+);
+
+CREATE TABLE IF NOT EXISTS public.sponsors(
+id_sponsor INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+sponsor_name VARCHAR(255) NOT NULL CONSTRAINT unique_sponsor_name UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS public.zones(
+id_zone INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+zone_type VARCHAR(50) NOT NULL,
+
+CONSTRAINT zone_type_error check (zone_type in ('VIP', 'standard'))
+);
+
+CREATE TABLE IF NOT EXISTS public.sponsors_in_zones(
+zone_id INT NOT NULL,
+sponsor_id INT DEFAULT NULL,
+activity_id INT NOT NULL,
+
+FOREIGN KEY (zone_id) references public.zones(id_zone),
+FOREIGN KEY (sponsor_id) references public.sponsors(id_sponsor),
+FOREIGN KEY (activity_id) references public.activities(activity_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.Ticket_to_zone(
+zone_id INT NOT NULL,
+type_id INT NOT NULL,
+
+FOREIGN KEY (zone_id) references public.zones(id_zone) on delete restrict,
+FOREIGN KEY (type_id) references public.ticket_type(type_id) on delete restrict
+);
