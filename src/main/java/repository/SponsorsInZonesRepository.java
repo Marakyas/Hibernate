@@ -16,9 +16,9 @@ public class SponsorsInZonesRepository extends GenericRepository<SponsorsInZones
         try (EntityManager em = HibernateUtil.createEntityManager()) {
             return em.createQuery(
                             "SELECT sz FROM SponsorsInZones sz " +
-                                    "JOIN FETCH sz.zone " +      // Подгружаем объект зоны
-                                    "LEFT JOIN FETCH sz.sponsor " + // Используем LEFT, так как спонсор может быть null
-                                    "JOIN FETCH sz.activity " +  // Подгружаем объект активности
+                                    "JOIN FETCH sz.zone " +
+                                    "LEFT JOIN FETCH sz.sponsor " +
+                                    "JOIN FETCH sz.activity " +
                                     "WHERE sz.id.zoneId = :zoneId", SponsorsInZones.class)
                     .setParameter("zoneId", zoneId)
                     .getResultList();

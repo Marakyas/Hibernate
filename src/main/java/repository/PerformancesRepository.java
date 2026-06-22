@@ -16,8 +16,8 @@ public class PerformancesRepository extends GenericRepository<Perfomances, Integ
         try (EntityManager em = HibernateUtil.createEntityManager()) {
             return em.createQuery(
                             "SELECT p FROM Perfomances p " +
-                                    "JOIN FETCH p.group " + // Сразу тянем группу
-                                    "JOIN FETCH p.scene " + // Сразу тянем сцену со составным ключом
+                                    "JOIN FETCH p.group " +
+                                    "JOIN FETCH p.scene " +
                                     "WHERE p.startPerformance BETWEEN :from AND :to " +
                                     "ORDER BY p.startPerformance", Perfomances.class)
                     .setParameter("from", from)

@@ -21,8 +21,19 @@ public class CrudService {
     public void demoCreate() {
         printHeader("CREATE — Создание записей");
 
-        Client client = clientRepo.save(new Client("Алексей", "Горшенев", "alex_rock@event.ru"));
-        System.out.printf("Создан клиент: id=%d, %s %s%n", client.getId(), client.getName(), client.getSurname());
+        Client existingClient = clientRepo.findAll().stream()
+                .filter(c -> "alex_rock@event.ru".equals(c.getEmail()))
+                .findFirst()
+                .orElse(null);
+
+        Client client;
+        if (existingClient == null) {
+            client = clientRepo.save(new Client("Алексей", "Горшенев", "alex_rock@event.ru"));
+            System.out.printf("Создан клиент: id=%d, %s %s%n", client.getId(), client.getName(), client.getSurname());
+        } else {
+            client = existingClient;
+            System.out.printf("Клиент с email %s уже существует в базе (id=%d)%n", client.getEmail(), client.getId());
+        }
 
         Groups group = groupsRepo.save(new Groups("Кукрыниксы", "Рок"));
         System.out.printf("Создана группа: id=%d, '%s', стиль: %s%n", group.getGroupId(), group.getGroupName(), group.getMusicStyle());
